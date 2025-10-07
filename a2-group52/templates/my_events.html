@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}My Events{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h4 mb-0">My Created Events</h1>
+    <a href="{{ url_for('create_event') }}" class="btn btn-primary">Create New Event</a>
+</div>
+
+{% if not events %}
+<div class="alert alert-info">You haven't created any events yet.</div>
+{% else %}
+<div class="list-group">
+    {% for event in events %}
+    <div class="list-group-item list-group-item-action flex-column align-items-start">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <div class="d-flex w-100 justify-content-between">
+                    <h5 class="mb-1">{{ event.title }}</h5>
+                    <small>{{ event.date.strftime('%Y-%m-%d') }}</small>
+                </div>
+                <p class="mb-1 text-muted">{{ event.venue }} &middot; {{ event.artist_names }}</p>
+                <small>
+                    Status:
+                    <span class="badge 
+                        {% if event.status.name == 'OPEN' %} bg-success
+                        {% elif event.status.name == 'CANCELLED' %} bg-danger
+                        {% elif event.status.name == 'SOLDOUT' %} bg-warning text-dark
+                        {% else %} bg-secondary
+                        {% endif %}">
+                        {{ event.status.value }}
+                    </span>
+                </small>
+            </div>
+            <div class="col-md-4 text-md-end mt-2 mt-md-0">
+                <a href="{{ url_for('event_detail', event_id=event.id) }}" class="btn btn-sm btn-outline-secondary me-2">View</a>
+                {% if event.status.name == 'OPEN' %}
+                <form action="{{ url_for('cancel_event', event_id=event.id) }}" method="post" class="d-inline" onsubmit="return confirm('Are you sure you want to cancel this event?');">
+                    <button type="submit" class="btn btn-sm btn-danger">Cancel</button>
+                </form>
+                {% elif event.status.name == 'CANCELLED' %}
+                <form action="{{ url_for('reactivate_event', event_id=event.id) }}" method="post" class="d-inline">
+                    <button type="submit" class="btn btn-sm btn-success">Reactivate</button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+{% endblock %}

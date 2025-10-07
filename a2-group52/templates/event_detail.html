@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}Event — {{ ev.title }}{% endblock %}
+{% block content %}
+<div class="row g-4">
+  <div class="col-12 col-lg-7">
+    <img src="{{ ev.image_url or url_for('static', filename='img/default.jpg') }}" alt="{{ ev.title }}" class="img-fluid rounded-3 shadow-sm">
+  </div>
+  <div class="col-12 col-lg-5">
+    <h1 class="h3">{{ ev.title }}</h1>
+    <div class="small text-muted mb-2">{{ ev.category }} • {{ ev.age_restriction }}</div>
+    <p class="mb-1"><strong>Artists:</strong> {{ ev.artist_names }}</p>
+    <p class="mb-1"><strong>When:</strong> {{ ev.date.strftime('%Y-%m-%d') }} {{ ev.start_time.strftime('%H:%M') }} – {{ ev.end_time.strftime('%H:%M') }}</p>
+    <p class="mb-1"><strong>Where:</strong> {{ ev.venue }}</p>
+    <p class="mb-1"><strong>Capacity:</strong> {{ ev.capacity }} · <strong>Available:</strong> {{ ev.tickets_available }}</p>
+    
+    <div class="mt-2">
+      <span class="badge fs-6 
+        {% if ev.status.name == 'OPEN' %} bg-success
+        {% elif ev.status.name == 'CANCELLED' %} bg-danger
+        {% elif ev.status.name == 'SOLDOUT' %} bg-warning text-dark
+        {% else %} bg-secondary
+        {% endif %}">
+        {{ ev.status.value }}
+      </span>
+    </div>
+
+    <p class="mt-3">{{ ev.description }}</p>
+
+    <hr />
+
+    {% if is_owner %}
+      <div class="alert alert-info">You are the creator of this event. <a href="{{ url_for('my_events') }}">Manage your events</a>.</div>
+    {% elif not user %}
+      <div class="alert alert-warning">Please <a href="{{ url_for('login', next=request.url) }}">log in</a> to book tickets.</div>
+    {% else %}
+      <h2 class="h6">Book tickets</h2>
+      {% if ev.status.name == 'OPEN' %}
+      <form method="post">
+        {{ book_form.hidden_tag() }}
+        <div class="row g-2">
+          <div class="col-6">{{ book_form.tickets(class="form-control", type="number", min="1", max=ev.tickets_available) }}</div>
+          <div class="col-6">
+            <button class="btn btn-primary w-100" name="book" value="1" type="submit">Book</button>
+          </div>
+        </div>
+      </form>
+      {% else %}
+        <p class="text-muted">Booking is not available for this event.</p>
+      {% endif %}
+    {% endif %}
+  </div>
+</div>
+
+<hr class="my-4" />
+
+<h2 class="h6">Comments</h2>
+<form method="post" class="mb-3">
+  {{ comment_form.hidden_tag() }}
+  <div class="row g-2">
+    <div class="col-12 col-md-4">{{ comment_form.user_name(class="form-control", placeholder="Your name (optional)") }}</div>
+    <div class="col-12 col-md-8">{{ comment_form.content(class="form-control", placeholder="Write a comment...") }}</div>
+  </div>
+  <button class="btn btn-outline-primary mt-2" name="comment" value="1" type="submit">Post</button>
+</form>
+
+<div class="vstack gap-3">
+  {% for c in comments %}
+  <div class="border rounded-3 p-3">
+    <div class="d-flex justify-content-between small text-muted mb-1">
+      <span>{{ c.author_name or 'Anonymous' }}</span>
+      <time>{{ c.posted_at.strftime('%Y-%m-%d %H:%M') }}</time>
+    </div>
+    <p class="mb-0">{{ c.content }}</p>
+  </div>
+  {% else %}
+  <div class="alert alert-light">No comments yet.</div>
+  {% endfor %}
+</div>
+{% endblock %}
