@@ -34,6 +34,8 @@
             </div>
             <div class="col-md-4 text-md-end mt-2 mt-md-0">
                 <a href="{{ url_for('event_detail', event_id=event.id) }}" class="btn btn-sm btn-outline-secondary me-2">View</a>
+                <a href="{{ url_for('edit_event', event_id=event.id) }}" class="btn btn-sm btn-outline-primary me-2">Edit</a>
+                
                 {% if event.status.name == 'OPEN' %}
                 <form action="{{ url_for('cancel_event', event_id=event.id) }}" method="post" class="d-inline" onsubmit="return confirm('Are you sure you want to cancel this event?');">
                     <button type="submit" class="btn btn-sm btn-danger">Cancel</button>

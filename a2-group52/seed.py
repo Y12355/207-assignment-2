@@ -6,8 +6,14 @@ with app.app_context():
     db.drop_all()
     db.create_all()
 
-    # 创建一个示例用户
-    u = User(name='Demo User', email='demo@example.com', password='password123')
+    u = User(
+        first_name='Demo',
+        surname='User',
+        email='demo@example.com',
+        password='password123',
+        contact_number='0400123456',
+        street_address='123 Example St, Brisbane QLD 4000'
+    )
     db.session.add(u)
     db.session.commit()
 
@@ -39,9 +45,7 @@ with app.app_context():
     add_event("Pop Show",        "Pop",       "Amy",   "Room 5", 8, 180,  30, "pop.jpg")
     add_event("Rock Fest",       "Rock",      "Riffs", "Room 6",10, 220, 120, "rock.jpg")
     
-    # 添加一个已取消的活动
     add_event("Cancelled Concert", "Rock", "No Show", "Venue X", 12, 100, 100, "rock.jpg", status=EventStatus.CANCELLED)
-
 
     db.session.commit()
     print("✅ Database seeded successfully.")

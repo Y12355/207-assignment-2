@@ -1,5 +1,3 @@
-# app.py
-
 import os
 from datetime import datetime
 from flask import Flask, render_template, request, redirect, url_for, flash, session, abort
@@ -35,7 +33,6 @@ def is_owner(event):
 
 @app.route("/")
 def index():
-    # ... (此部分代码无需修改)
     q = request.args.get("q", "").strip().lower()
     cat = request.args.get("cat", "All")
     query = Event.query
@@ -53,10 +50,8 @@ def index():
     categories = ["All", "Classical", "Indie", "Jazz", "Electronic", "Pop", "Rock"]
     return render_template("index.html", events=events, q=q, cat=cat, categories=categories)
 
-
 @app.route("/event/<int:event_id>", methods=["GET", "POST"])
 def event_detail(event_id):
-    # ... (此部分代码的 flash 消息也需要修改)
     ev = Event.query.get_or_404(event_id)
     book_form = BookingForm()
     comment_form = CommentForm()
@@ -85,8 +80,14 @@ def event_detail(event_id):
         elif "comment" in request.form:
             if comment_form.validate_on_submit():
                 user = User.query.get(user_id)
-                name = comment_form.user_name.data.strip() or user.name
-                c = Comment(event_id=ev.id, user_id=user_id, author_name=name, content=comment_form.content.data.strip())
+                author_full_name = f"{user.first_name} {user.surname}"
+                
+                c = Comment(
+                    event_id=ev.id,
+                    user_id=user_id,
+                    author_name=author_full_name,
+                    content=comment_form.content.data.strip()
+                )
                 db.session.add(c)
                 db.session.commit()
                 flash("Comment posted.", "success")
@@ -100,7 +101,6 @@ def create_event():
         return redirect(url_for("login"))
     form = EventForm()
     if form.validate_on_submit():
-        # ...
         ev = Event(
             title=form.title.data.strip(), category=form.category.data, artist_names=form.artist.data.strip(),
             venue=form.venue.data.strip(), date=form.date.data, start_time=form.start.data, end_time=form.end.data,
@@ -113,9 +113,24 @@ def create_event():
         return redirect(url_for("event_detail", event_id=ev.id))
     return render_template("create_event.html", form=form)
 
+@app.route("/event/<int:event_id>/edit", methods=["GET", "POST"])
+def edit_event(event_id):
+    if not login_required():
+        return redirect(url_for("login"))
+    event = Event.query.get_or_404(event_id)
+    if not is_owner(event):
+        flash("You are not authorized to edit this event.", "danger")
+        return redirect(url_for('event_detail', event_id=event.id))
+    form = EventForm(obj=event)
+    if form.validate_on_submit():
+        form.populate_obj(event)
+        db.session.commit()
+        flash("Event updated successfully!", "success")
+        return redirect(url_for('event_detail', event_id=event.id))
+    return render_template("edit_event.html", form=form, event_id=event.id)
+
 @app.route("/my_events")
 def my_events():
-    # ...
     if not login_required():
         return redirect(url_for("login"))
     user_id = session['user_id']
@@ -124,7 +139,6 @@ def my_events():
 
 @app.route("/event/<int:event_id>/cancel", methods=["POST"])
 def cancel_event(event_id):
-    # ...
     if not login_required(): return abort(401)
     event = Event.query.get_or_404(event_id)
     if not is_owner(event): return abort(403)
@@ -135,7 +149,6 @@ def cancel_event(event_id):
 
 @app.route("/event/<int:event_id>/reactivate", methods=["POST"])
 def reactivate_event(event_id):
-    # ...
     if not login_required(): return abort(401)
     event = Event.query.get_or_404(event_id)
     if not is_owner(event): return abort(403)
@@ -146,7 +159,6 @@ def reactivate_event(event_id):
 
 @app.route("/history")
 def history():
-    # ...
     if not login_required(): return redirect(url_for("login"))
     user_id = session['user_id']
     bookings = Booking.query.filter_by(user_id=user_id).order_by(Booking.booked_at.desc()).all()
@@ -175,7 +187,14 @@ def register():
         if User.query.filter_by(email=email).first():
             flash("This email is already registered.", "danger")
         else:
-            new_user = User(name=form.name.data.strip(), email=email, password=form.password.data)
+            new_user = User(
+                first_name=form.first_name.data.strip(),
+                surname=form.surname.data.strip(),
+                email=email,
+                password=form.password.data,
+                contact_number=form.contact_number.data.strip(),
+                street_address=form.street_address.data.strip()
+            )
             db.session.add(new_user)
             db.session.commit()
             flash("Account created successfully! Please log in.", "success")

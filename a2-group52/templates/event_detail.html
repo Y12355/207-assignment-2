@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block title %}Event — {{ ev.title }}{% endblock %}
+
 {% block content %}
 <div class="row g-4">
   <div class="col-12 col-lg-7">
@@ -29,9 +30,12 @@
     <hr />
 
     {% if is_owner %}
-      <div class="alert alert-info">You are the creator of this event. <a href="{{ url_for('my_events') }}">Manage your events</a>.</div>
+      <div class="alert alert-info d-flex justify-content-between align-items-center mt-3">
+        <span>You are the creator of this event.</span>
+        <a href="{{ url_for('edit_event', event_id=ev.id) }}" class="btn btn-primary btn-sm">Edit Event</a>
+      </div>
     {% elif not user %}
-      <div class="alert alert-warning">Please <a href="{{ url_for('login', next=request.url) }}">log in</a> to book tickets.</div>
+      <div class="alert alert-warning">Please <a href="{{ url_for('login', next=request.url) }}">log in</a> to book tickets or post a comment.</div>
     {% else %}
       <h2 class="h6">Book tickets</h2>
       {% if ev.status.name == 'OPEN' %}
@@ -53,27 +57,30 @@
 
 <hr class="my-4" />
 
+{% if user %}
 <h2 class="h6">Comments</h2>
 <form method="post" class="mb-3">
   {{ comment_form.hidden_tag() }}
   <div class="row g-2">
-    <div class="col-12 col-md-4">{{ comment_form.user_name(class="form-control", placeholder="Your name (optional)") }}</div>
-    <div class="col-12 col-md-8">{{ comment_form.content(class="form-control", placeholder="Write a comment...") }}</div>
+    <div class="col-12">
+        {{ comment_form.content(class="form-control", placeholder="Write a comment...") }}
+    </div>
   </div>
-  <button class="btn btn-outline-primary mt-2" name="comment" value="1" type="submit">Post</button>
+  <button class="btn btn-outline-primary mt-2" name="comment" value="1" type="submit">Post Comment</button>
 </form>
+{% endif %}
 
 <div class="vstack gap-3">
   {% for c in comments %}
   <div class="border rounded-3 p-3">
     <div class="d-flex justify-content-between small text-muted mb-1">
-      <span>{{ c.author_name or 'Anonymous' }}</span>
+      <strong>{{ c.author_name or 'Anonymous' }}</strong>
       <time>{{ c.posted_at.strftime('%Y-%m-%d %H:%M') }}</time>
     </div>
     <p class="mb-0">{{ c.content }}</p>
   </div>
   {% else %}
-  <div class="alert alert-light">No comments yet.</div>
+  <div class="alert alert-light">No comments yet. Be the first to comment!</div>
   {% endfor %}
 </div>
 {% endblock %}

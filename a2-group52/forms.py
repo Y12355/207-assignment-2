@@ -1,5 +1,3 @@
-# forms.py
-
 from flask_wtf import FlaskForm
 from wtforms import (
     StringField, PasswordField, IntegerField, DateField, TimeField,
@@ -18,19 +16,19 @@ CATEGORY_CHOICES = [
 
 AGE_CHOICES = [("All-ages", "All-ages"), ("18+", "18+")]
 
-
 class LoginForm(FlaskForm):
     email = StringField("Email", validators=[DataRequired(), Email()])
     password = PasswordField("Password", validators=[DataRequired(), Length(min=4)])
     submit = SubmitField("Sign In")
 
-
 class RegisterForm(FlaskForm):
-    name = StringField("Name", validators=[DataRequired(), Length(min=2, max=80)])
+    first_name = StringField("First Name", validators=[DataRequired(), Length(min=2, max=80)])
+    surname = StringField("Surname", validators=[DataRequired(), Length(min=2, max=80)])
     email = StringField("Email", validators=[DataRequired(), Email(message="Invalid email address.")])
     password = PasswordField("Password", validators=[DataRequired(), Length(min=4)])
+    contact_number = StringField("Contact Number", validators=[DataRequired()])
+    street_address = StringField("Street Address", validators=[DataRequired()])
     submit = SubmitField("Create Account")
-
 
 class EventForm(FlaskForm):
     title = StringField("Title", validators=[DataRequired()])
@@ -47,13 +45,10 @@ class EventForm(FlaskForm):
     desc = TextAreaField("Description", validators=[Optional(), Length(max=2000)])
     submit = SubmitField("Create Event")
 
-
 class BookingForm(FlaskForm):
     tickets = IntegerField("Tickets", validators=[DataRequired(), NumberRange(min=1)])
     submit = SubmitField("Book Now")
 
-
 class CommentForm(FlaskForm):
-    user_name = StringField("Name", validators=[Optional(), Length(min=0, max=80)])
     content = TextAreaField("Comment", validators=[DataRequired(), Length(min=1, max=1000)])
     submit = SubmitField("Post Comment")
