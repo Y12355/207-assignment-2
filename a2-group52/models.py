@@ -5,13 +5,11 @@ from sqlalchemy import Enum as SAEnum
 
 db = SQLAlchemy()
 
-
 class EventStatus(Enum):
     OPEN = "Open"
     INACTIVE = "Inactive"
     SOLDOUT = "Sold Out"
     CANCELLED = "Cancelled"
-
 
 class User(db.Model):
     __tablename__ = "users"
@@ -23,7 +21,6 @@ class User(db.Model):
     contact_number = db.Column(db.String(20), nullable=False)
     street_address = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-
 
 class Event(db.Model):
     __tablename__ = "events"
@@ -48,7 +45,6 @@ class Event(db.Model):
 
     comments = db.relationship("Comment", backref="event", lazy=True)
 
-
 class Booking(db.Model):
     __tablename__ = "bookings"
     id = db.Column(db.Integer, primary_key=True)
@@ -71,3 +67,4 @@ class Comment(db.Model):
     posted_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     user = db.relationship("User", backref="comments")
+
