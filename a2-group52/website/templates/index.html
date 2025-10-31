@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Home — Music Events{% endblock %}
+{% block content %}
+<h1 class="h4 mb-3">Discover music events</h1>
+
+<form class="row g-2 align-items-center mb-3" method="get" action="{{ url_for('index') }}">
+  <div class="col-auto">
+    <span class="input-group-text">Search</span>
+  </div>
+  <div class="col">
+    <input type="search" name="q" class="form-control" placeholder="Title, artist, venue..." value="{{ q }}">
+  </div>
+  <div class="col-auto">
+    <select class="form-select" name="cat">
+      {% for c in categories %}
+        <option value="{{ c }}" {% if c==cat %}selected{% endif %}>{{ c }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-auto">
+    <button class="btn btn-primary" type="submit">Go</button>
+  </div>
+</form>
+
+<div class="mb-3">
+  {% for c in categories %}
+    <a href="{{ url_for('index', cat=c, q='') }}" class="btn btn-sm {% if c==cat %}btn-primary{% else %}btn-outline-primary{% endif %} me-2">{{ c }}</a>
+  {% endfor %}
+</div>
+
+{% if events|length == 0 %}
+  <div class="alert alert-info">No matching events.</div>
+{% else %}
+  <div class="row g-3">
+  {% for ev in events %}
+    <div class="col-12 col-sm-6 col-lg-4">
+      <div class="card h-100 shadow-sm border-0">
+        <div class="ratio ratio-16x9">
+          <img class="card-img-top object-cover" src="{{ ev.image_url }}" alt="{{ ev.title }}">
+        </div>
+        <div class="card-body d-flex flex-column">
+          <div class="mb-1 small text-muted">{{ ev.category }} • {{ ev.status.value }}</div>
+          <h3 class="h6 card-title">{{ ev.title }}</h3>
+          <p class="card-text small text-muted mb-1">{{ ev.artist_names }}</p>
+          <p class="card-text small mb-2">{{ ev.date }} {{ ev.start_time }} – {{ ev.end_time }} · {{ ev.venue }}</p>
+          <div class="mt-auto d-grid">
+            <a class="btn btn-outline-primary" href="{{ url_for('event_detail', event_id=ev.id) }}">View details</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  {% endfor %}
+  </div>
+{% endif %}
+{% endblock %}
